@@ -1,0 +1,32 @@
+@{
+    Layout = "_Layout";
+}
+@model CreateViewModel
+<div class="row">
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8">
+        <form asp-controller="User" asp-action="UserCreate" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="FullName">İsim Soyisim</label>
+                <input asp-for="FullName" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email">E Posta</label>
+                <input asp-for="Email" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password">Şifre</label>
+                <input asp-for="Password" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword">Şifre Tekrar</label>
+                <input asp-for="ConfirmPassword" class="form-control">
+            </div>
+        
+            <button type="submit" class="btn btn-primary">Ekle</button>
+        </form>
+    </div>
+    <div class="col-lg-2"></div>
+    
+</div>

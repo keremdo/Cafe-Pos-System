@@ -1,0 +1,70 @@
+@model AppUser
+
+<style>
+    .headerPicture {
+        border-radius: 10px;
+    }
+
+    .profileHeader {
+        border-left: 5px solid brown;
+        border-radius: 10px;
+    }
+
+    .profileBody {
+        border-left: 5px solid brown;
+        border-radius: 10px;
+    }
+
+    label {
+        font-size: 17px;
+    }
+</style>
+
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row mb-5 profileHeader" style="height: 22%; padding: 7px; overflow: hidden;">
+        <div class="col-lg-2">
+            <img class="headerPicture"
+                src="~/image/cafeposaltlogo.jpg" alt=""
+                style="max-width: 100%; height: auto;">
+        </div>
+        <div class="col-lg-10">
+            <div class="mb-3">
+                <label for="isimSoyisim" class="form-label">İsim Soyisim:</label>
+                <label for="isimSoyisim" class="form-label">@Model.FullName</label>
+            </div>
+            <div class="mb-3">
+                <label for="telefonNumarasi" class="form-label">Telefon Numarası:</label>
+                <label for="telefonNumarasi" class="form-label">@Model.PhoneNumber</label>
+            </div>
+            <div class="mb-3">
+                <label for="adres" class="form-label">Adres:</label>
+                <label for="adres" class="form-label">@Model.Adress</label>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3 profileBody" style="padding: 20px; ">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Tanımlar</th>
+                    <th scope="col">Değerler</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Firma İsmi</td>
+                    <td>@Model.CompanyName</td>
+                </tr>
+                <tr>
+                    <td>E Posta</td>
+                    <td>@Model.Email</td>
+                </tr>
+                <tr>
+                    <td>Firma Müşteri Numarası</td>
+                    <td>@Model.MandantID</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

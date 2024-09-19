@@ -1,0 +1,40 @@
+@model Product
+<div class="container-fluid" style="height: 80vh;">
+    <form asp-controller="Products" asp-action="ProductEdit" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="@Model.ProductId">
+    <div class="row">
+        <!-- İlk boş kolon -->
+        <div class="col-3">
+            <img src="~/image/@Model.ImageUrl" alt="" class="img-fluid">
+            <input type="hidden" asp-for="@Model.ImageUrl">
+            <div class="mb-3">
+                <label  for="productImage" class="form-label">Ürün Resmi:</label>
+                <input type="file" class="form-control" id="imageFile" name="imageFile">
+            </div>
+        </div>
+        
+        <!-- İkinci kolon -->
+        <div class="col-9">
+                <div class="mb-3">
+                    <label asp-for="@Model.ProductName" class="form-label">Ürün İsmi:</label>
+                    <input asp-for="@Model.ProductName" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label asp-for="@Model.ProductPurchasePrice" class="form-label">Ürün Alış Fiyatı:</label>
+                    <input asp-for="@Model.ProductPurchasePrice" class="form-control" type="number">
+                </div>
+                <div class="mb-3">
+                    <label asp-for="@Model.ProductPrice" class="form-label">Ürün Fiyatı:</label>
+                    <input asp-for="@Model.ProductPrice" class="form-control" type="number">
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Description" class="col-form-label">Ürün Açıklaması:</label>
+                    <textarea asp-for="@Model.Description" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Değişiklikleri Kaydet</button>
+                </div>
+        </div>
+     </form>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+<style>
+  .card:hover {
+      transform: scale(1.05); /* Kartı büyütme */
+      transition: transform 0.3s ease; /* Geçiş efekti */
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 1.0s ease;
+      background-color: #E7B10A;
+
+  }
+
+  .card p{
+    color: rgb(49, 51, 51);
+    font-weight: bold;
+    font-size: 20px;
+    text-align: center;
+  }
+
+</style>
+
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row" style="height: 100%;">
+        <div href="#" class="col d-flex justify-content-center">
+            <a asp-action="Categories" class="card " style="width: 20rem;">
+                <img class="card-img-top" src="https://i.pinimg.com/564x/a9/9e/3b/a99e3b4ea7d6026567de99a5843ab2ba.jpg" alt="Card image cap">
+                <div class="card-body">
+                  <p class="card-text">KATEGORİLER</p>
+                </div>
+            </a>
+        </div>
+        <div href="#" class="col d-flex justify-content-center">
+            <a asp-action="AllProducts" class="card" style="width: 20rem;">
+                <img class="card-img-top" src="https://i.pinimg.com/564x/d1/e6/16/d1e616c65ec9c406ebe5242d918473a6.jpg" alt="Card image cap">
+                <div class="card-body">
+                  <p class="card-text">ÜRÜNLER</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

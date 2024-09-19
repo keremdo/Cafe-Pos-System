@@ -1,0 +1,107 @@
+@model CategoryViewModel
+<style>
+    .card a:hover{
+        text-decoration: none;
+    }
+    .card-body{
+        color: gray;
+    }
+</style>
+
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row mb-3 d-flex align-items-center" style="height: 10%;">
+        <div class="col">
+            <input type="text" class="form-control" style="width: 30%;" placeholder="Kategori Ara..."> 
+            <div style="position: absolute; top: 0; right: 0;">
+                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#AddCategory">Kategori Ekle</a>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="height: 90%; background-color: #FFFFFF; overflow-x: auto;">
+        <div class="col">
+            <div class="row" style=" margin-top: 15px; margin-left: 15px;">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Kategori Numarası</th>
+                        <th scope="col">Kategori Adı</th>
+                        <th scope="col">Kategorideki Ürün Sayısı</th>
+                        <th scope="col">İşlemler</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        @if(Model.Categories == null)
+                        {
+                            <tr>
+                                <th scope="row">Kategori Yok</th>
+                                <td>Kategori Yok</td>
+                                <td>Kategori Yok</td>
+                                <td>
+                                    <a href="#" class="btn btn-primary">Kategori Yok</a>
+                                    <a href="#" class="btn btn-warning">Kategori Yok</a>
+                                </td>
+                              </tr>
+                        }else{
+                            @foreach(var category in Model.Categories)
+                            {
+                                
+                                <tr>
+                                    <th scope="row">@category.CategoryId</th>
+                                    <td>@category.CategoryName</td>
+                                    <td>@category.Products.Count</td>
+                                    <td>
+                                        <a asp-action="CategoryDetails" asp-route-id="@category.CategoryId" class="btn btn-primary">Detaylar</a>
+                                        <form style="display: inline-block;" asp-route-id="@category.CategoryId" asp-action="DeleteCategory"
+                                        method="post">
+                                            <button type="submit"  class="btn btn-warning" onclick="return confirm('Bu kategoriyi kalıcı olarak silmek istediğinize emin misiniz?')">Sil</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        
+                      
+                    </tbody>
+                  </table>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<!-- Ürün Ekleme -->
+  <div class="modal" id="AddCategory" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Kategori Ekle</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+    <form asp-controller="Products" asp-action="AddCategory" method="post">
+        <div class="modal-body">
+            <div class="row" style="width: 100%;">
+                <div class="col" style="width: 50%;">
+                    <div class="mb-3">
+                    <label asp-for="CategoryName" class="form-label">Kategori İsmi:</label>
+                    <input asp-for="CategoryName" class="form-control">
+                    </div>
+                </div>
+                <div class="col" style="width: 50%;">
+                    <div class="mb-3">
+                        <label for="productImage" class="form-label">KategoriResmi:</label>
+                        <input type="file" class="form-control" id="productImage" accept="image/*" onchange="previewProductImage(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Kategori Ekle</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+        </div> 
+    </form>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,87 @@
+@model CustomerListViewModel
+
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row mb-3 d-flex align-items-center" style="height: 10%;">
+        <h2 class="col">Müşteriler</h2>
+        <div class="col text-end">
+        <a  class="btn btn-success" data-bs-toggle="modal" data-bs-target="#customerModal">Müşteri Ekle</a>
+    </div>
+    <div class="row mb-3 d-flex align-items-center" style="height: 90%;">
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Müşteri Numarası</th>
+                <th scope="col">Müşteri Adı Adı</th>
+                <th scope="col">Müşteri Soyadı</th>
+                <th scope="col">Müşteri Borcu</th>
+                <th scope="col">İşlemler</th>
+                
+              </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model.Customers)
+                    {
+                        <tr>
+                            <th scope="row">@item.CustomerId</th>
+                            <td>@item.CustomerName</td>
+                            <td>@item.CustomerSurname</td>
+                            <td>@item.CustomerBalance.ToString("F2")₺</td>
+                            <td>
+                                <form method="get" style="display: inline-block;">
+                                    <a asp-controller="Customer" asp-route-customerId="@item.CustomerId" asp-action="CustomerDetail" class="btn btn-primary">Müşteri Detay</a>
+                                </form>
+                                <form method="post" asp-controller="Customer" asp-action="DeleteCustomer" asp-route-customerId="@item.CustomerId"  style="display: inline-block;" onsubmit="return confirmDelete(event);">
+                                    <button type="submit" class="btn btn-warning">Müşteri Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }  
+            </tbody>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerModalLabel">Yeni Müşteri Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Customer" asp-action="AddCustomer" id="customerForm" method="post">
+                    <div class="mb-3">
+                        <label asp-for="CustomerName" class="form-label">Müşteri Adı</label>
+                        <input asp-for="CustomerName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="CustomerSurname" class="form-label">Müşteri Soyadı</label>
+                        <input asp-for="CustomerSurname" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="CustomerPhone" class="form-label">Telefon Numarası</label>
+                        <input asp-for="CustomerPhone" class="form-control" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete(event) {
+        // Onay mesajını göster
+        var confirmed = confirm("Müşteri kalıcı olarak silinecek. Emin misiniz?");
+        // Onaylanmazsa form gönderimini iptal et
+        if (!confirmed) {
+            event.preventDefault();
+        }
+        return confirmed;
+    }
+</script>

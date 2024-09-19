@@ -1,0 +1,101 @@
+@model AreaViewModel
+<div class="container-fluid" style="height: 80vh;">
+    <div class="card mb-3">
+        <div class="card-body d-flex align-items-center" style="height: 10%;">
+            <div class="col">
+                <h2>@Model.Area.AreaName</h2>
+
+                <div style="position: absolute; top: 0; right: 0;">
+                    <form style="display: inline-block;" asp-route-id="@Model.Area.AreaId" asp-action="DeleteArea"
+                        method="post">
+                        <button type="submit"  class="btn btn-warning"
+                            onclick="return confirm('Bu bölgeyi silmek istediğinize emin misiniz?')">Bölgeyi
+                            Sil</button>
+                    </form>
+                    <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#AddTableModal">Masa Ekle</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="card" style="height: 90%;">
+        <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                          <th scope="col">Masa Numarası</th>
+                          <th scope="col">Masa İsmi</th>
+                          <th scope="col">Masa Bölge</th>
+                          <th scope="col">İşlemler</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @if(Model.Tables.Count == 0)
+                        {
+                            <tr>
+                                <th scope="row">Masa Yok</th>
+                                <td>Masa Yok</td>
+                                <td>Masa Yok</td>
+                                <td>
+                                    <a href="#" class="btn btn-warning">Masa Yok</a>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach(var table in Model.Tables)
+                            { 
+                                <tr>
+                                    <th scope="row">@table.TableId</th>
+                                    <td>@table.TableName</td>
+                                    <td>@table.Area.AreaName</td>
+                                    <td>
+                                        <form asp-action="DeleteTable" method="post" asp-route-id="@table.TableId" style="display: inline-block;">
+                                            <button type="submit"  class="btn btn-warning"
+                                            onclick="return confirm('Bu masayı silmek istediğinize emin misiniz?')">Masayı
+                                            Sil</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                      </tbody>
+                </table>
+        </div>
+    </div>
+
+</div>
+
+
+
+<div class="modal" id="AddTableModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Masa İsmi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" asp-action="AddTableByArea">
+                <div class="modal-body" style="width: 50%;">
+                    <div class="mb-3">
+                        <label asp-for="TableName" class="form-label">Masa İsmi:</label>
+                        <input asp-for="TableName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="AreaName"> Bölge İsmi</label>
+                        <select asp-for="Area" asp-items="ViewBag.Areas" class="form-select" name="AreaId">
+                            <option value="@Model.Area.AreaId">@Model.Area.AreaName</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Masa Ekle</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

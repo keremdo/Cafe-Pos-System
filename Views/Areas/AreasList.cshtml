@@ -1,0 +1,72 @@
+@model AreaViewModel
+<style>
+    /* Hover durumunda arka plan rengini ve ölçeği değiştirme */
+    .areasItem:hover {
+    /* Arka plan rengini değiştirme */
+    background-color: #FEEFAD; /* İstediğiniz rengi belirleyin */
+
+    /* Card'ı biraz büyütme */
+    transform: scale(1.05); /* Kartın boyutunu %5 büyütme */
+
+    /* Geçiş efekti ekleme */
+    transition: transform 0.3s, background-color 0.3s;
+}
+</style>
+
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row mb-3 d-flex align-items-center" style="height: 10%;">
+        <div class="col">
+            <input type="text" class="form-control" style="width: 30%;" placeholder="Bölge Ara...">
+            <div style="position: absolute; top: 0; right: 0;">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#AddArea">Bölge
+                    Ekle</button>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="height: 90%; background-color: #FFFFFF; overflow-x: auto;">
+        <div class="col">
+            <div class="row" style=" margin-top: 15px; margin-left: 15px;">
+                @foreach(var area in Model.Areas)
+                {
+                    <div class="card m-3 areasItem" style="width: 18rem;">
+                        <div class="card-body">
+                          <h5 class="card-title">@area.AreaName</h5>
+                          <h6 class="card-subtitle mb-2 text-muted">Masa Sayısı : @area.Tables.Count</h6>
+                          <a asp-action="AreaById" asp-route-id="@area.AreaId" class="card-link">Bölge Detay</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="AddArea" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bölge Ekle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form asp-controller="Areas" asp-action="CreateArea" method="post">
+                <div class="modal-body">
+                    <div class="row" style="width: 100%;">
+                        <div class="col" style="width: 50%;">
+                            <div class="mb-3">
+                                <label asp-for="AreaName" class="form-label">Bölge İsmi:</label>
+                                <input asp-for="AreaName" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Bölge Ekle</a>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+@{
+    Layout = "_Layout";
+}
+@model AppRole
+<div class="row">
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8">
+        <form asp-controller="Roles" asp-action="RoleCreate" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Name">Yetki - Ünvan</label>
+                <input asp-for="Name" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Ekle</button>
+        </form>
+    </div>
+    <div class="col-lg-2"></div>
+    
+</div>

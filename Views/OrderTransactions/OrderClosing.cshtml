@@ -1,0 +1,317 @@
+@model OrderClosingViewModel
+
+
+@{
+    var className = @Model.Order.isActive ? "primary":"danger";
+    var isActive = @Model.Order.isActive  ? "Açık Sipariş" : "Kapalı Sipariş";
+}
+
+<style>
+    /* Hover durumunda arka plan rengini ve ölçeği değiştirme */
+    .inline-form {
+            display: inline-block; /* Formları inline-block yapar */
+        }
+        .areasItem {
+            width: 18rem;
+            cursor: pointer; /* Kartın tıklanabilir olduğunu belirtir */
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .areasItem:hover {
+            transform: scale(1.05); /* Kartın boyutunu %5 büyütme */
+            background-color: #198754; /* Arka plan rengini değiştirme */
+            color: #FFC107;
+        }
+        .card-title {
+            margin: 0;
+        }
+        .btn-card {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .receipt {
+        width: 200mm;
+        padding: 20px;
+        font-size: 50px;
+        color: black;
+        font-weight: bold;
+        border: 2px solid #000;
+        margin: 0 auto;
+        }
+        .receiptForSplit {
+        width: 200mm;
+        padding: 20px;
+        font-size: 50px;
+        color: black;
+        font-weight: bold;
+        border: 2px solid #000;
+        margin: 0 auto;
+    }
+</style>
+
+<style media="print">
+        body * {
+            visibility: hidden;
+        }
+        #receipt, #receipt * {
+            visibility: visible;
+        }
+</style>
+<div id="receipt" class="receipt" style="display:none;">
+    <h3 style="font-size: 50px; font-weight: bold;" >Sipariş Detayları</h3>
+    <ul id="orderItems">
+        <!-- Sipariş öğeleri burada listelenecek -->
+        <!-- Sipariş öğeleri burada listelenecek -->
+        @foreach(var orderItem in Model.Order.OrderItems)
+        {
+            var parts = orderItem.Split("₺");
+            var quantityAndProduct = parts[0].Trim(); // Adet ve ürün adı kısmı
+        
+            <li>@quantityAndProduct </li>
+        }
+    </ul>
+    <p>Toplam Tutar: <span id="receiptAmount"></span>₺</p>
+    <p>Tarih: <span id="receiptDate"></span></p>
+    <p>Ödeme Yöntemi: <span id="paymentMethod"></span></p>
+</div>
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row h-100">
+        <div class="col-md-6" >
+            <div class="row ">
+                <div class="container mb-5">
+                    <form asp-controller="OrderTransactions" asp-action="PayingToCash" class="inline-form" method="post" asp-route-tableId="@Model.Table.TableId" asp-route-orderId="@Model.Order.OrderId" id="cashForm" onsubmit="return confirmAndCheckPaymentToCash()">
+                        <button type="submit" class="btn-card" >
+                            <div class="card m-3 areasItem">
+                                <div class="card-body">
+                                    <h2 class="card-title">Nakit</h2>
+                                </div>
+                            </div>
+                        </button>
+                    </form>
+
+                    <form asp-controller="OrderTransactions" asp-action="PayingToCard" class="inline-form" method="post" asp-route-tableId="@Model.Table.TableId" asp-route-orderId="@Model.Order.OrderId" id="cardForm" onsubmit="return confirmAndCheckPaymentToCard()">
+                        <button type="submit" class="btn-card">
+                            <div class="card m-3 areasItem">
+                                <div class="card-body">
+                                    <h2 class="card-title">Kredi Kartı</h2>
+                                </div>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="container mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Hesaptan Düş</h2>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-text text-danger">Girdiğiniz tutar toplam tutardan düşecektir</h3>
+                            <form id="closingForm" asp-controller="OrderTransactions" asp-route-tableid="@Model.Table.TableId" asp-route-orderid="@Model.Order.OrderId" asp-action="SplitByOrder" method="post" onsubmit="return confirmAndCheckPaymentToSplit()">
+                                <div class="form-group row">
+                                    <div class="col-sm-6">
+                                        <input type="number" class="form-control" id="priceInput" name="price" placeholder="Ödeme Tutarı Girin">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <button type="submit" class="btn btn-primary">Ödeme Al</button>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="creditCard" name="paymentMethod" value="creditCard">
+                                            <label class="form-check-label" for="creditCard">
+                                                Kredi Kartı ile Ödeme
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container mb-5">
+                    <!-- Yeni Kart Bileşeni -->
+                    <div class="card">
+                        <div class="card-header">
+                            Müşteriyi Borçlandır
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-text text-danger">Sipariş Tutarı Seçtiğiniz Müşterinin Carisine Borç Olarak Yazılacaktır</h3>
+                            <form id="debtForm" method="post" onsubmit="setFormAction(event)">
+                                <input type="hidden" id="orderId" value="@Model.Order.OrderId">
+                                <input type="hidden" id="tableId" value="@Model.Table.TableId">
+                                <label class="form-label">Müşteri Seçin</label>
+                                <div class="mb-3">
+                                    <select class="form-select" style="width: 50%; display: inline-block; margin-right: 10px;" id="customerSelect" required>
+                                        <option selected disabled value="">Müşteri Seçin...</option>
+                                        @foreach (var customer in @Model.Customers)
+                                        {
+                                            <option value="@customer.CustomerId">@customer.CustomerFullName</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="btn btn-primary">Borçlandır</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                
+        </div>
+        <div class="col-md-6">
+            <!-- İkinci sütun içeriği buraya gelecek -->
+            <main class="text-center">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h1 class="h4">Sipariş Detayı</h1>
+                    </div>
+                    <div class="card-body">
+                        
+                        <p>Sipariş Ücreti : @Model.Order.Price.ToString("F2")₺</p>
+                        
+                        <p>Sipariş Tarihi : @Model.Order.orderDate</p>
+                        <p>
+                            <span class="badge badge-@className">@isActive</span>
+                        </p>
+                    </div>
+                </div>
+            
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="h5">Sipariş Ürünleri</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            @foreach(var item in Model.OrderItems)
+                            {
+                                <li class="list-group-item">@item</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function confirmAndCheckPaymentToCash() {
+            // Model.CustomerBalance değerini Razor'dan al ve bir değişkene ata
+            // Kullanıcının girdiği ödeme tutarını al
+            var paymentAmount = parseFloat('@Model.Order.Price');
+            var paymentMethod = 'Nakit Ödeme';
+            
+
+            // Onay mesajı
+            var confirmed = confirm("Sipariş Ücreti Nakit Olarak Alındı Kabul Edilip Sipariş Kapatılacak Emin misiniz?");
+            if (!confirmed) {
+                return false;
+            }
+
+            // Fiş bilgilerini ayarla
+            document.getElementById('receiptAmount').innerText = paymentAmount.toFixed(2);
+            document.getElementById('paymentMethod').innerText = paymentMethod;
+            
+            
+            document.getElementById('receiptDate').innerText = new Date().toLocaleDateString();
+
+            // Fişi göster
+            document.getElementById('receipt').style.display = 'block';
+
+            // Fişi yazdır
+            window.print();
+
+            // Formun submit edilmesini geciktir
+            setTimeout(function() {
+                document.getElementById(cashForm).submit();
+            }, 1000); // 1 saniye gecikme
+
+            return true; // Formun hemen submit edilmesini engelle
+        }
+
+    function confirmAndCheckPaymentToCard() {
+            // Model.CustomerBalance değerini Razor'dan al ve bir değişkene ata
+            // Kullanıcının girdiği ödeme tutarını al
+            var paymentAmount = parseFloat('@Model.Order.Price');
+            var paymentMethod = 'Kredi Kartı İle Ödeme';
+            
+
+            // Onay mesajı
+            var confirmed = confirm("Sipariş Ücreti Kredi Kartı ile Alındı Kabul Edilip Sipariş Kapatılacak Emin misiniz?");
+            if (!confirmed) {
+                return false;
+            }
+
+            // Fiş bilgilerini ayarla
+            document.getElementById('receiptAmount').innerText = paymentAmount.toFixed(2);
+            document.getElementById('paymentMethod').innerText = paymentMethod;
+            
+            
+            document.getElementById('receiptDate').innerText = new Date().toLocaleDateString();
+
+            // Fişi göster
+            document.getElementById('receipt').style.display = 'block';
+
+            // Fişi yazdır
+            window.print();
+
+            // Formun submit edilmesini geciktir
+            setTimeout(function() {
+                document.getElementById(cardForm).submit();
+            }, 1000); // 1 saniye gecikme
+
+            return true; // Formun hemen submit edilmesini engelle
+        }
+    
+    
+    function confirmAndCheckPaymentToSplit() {
+            // Model.CustomerBalance değerini Razor'dan al ve bir değişkene ata
+            // Kullanıcının girdiği ödeme tutarını al
+            var paymentAmount = parseFloat(document.getElementById('priceInput').value);
+            
+
+            // Onay mesajı
+            var confirmed = confirm("Sipariş Ücreti Teslim Alındı Kabul Edilip Sipariş Tutarından Düşecek Emin misiniz?");
+            if (!confirmed) {
+                return false;
+            }
+
+            // Fiş bilgilerini ayarla
+            document.getElementById('receiptAmount').innerText = paymentAmount.toFixed(2);
+            document.getElementById('receiptDate').innerText = new Date().toLocaleDateString();
+
+            
+            document.getElementById('receipt').style.display = 'block';
+            
+
+            // Fişi yazdır
+            window.print();
+
+            // Formun submit edilmesini geciktir
+            setTimeout(function() {
+                document.getElementById(closingForm).submit();
+            }, 1000); // 1 saniye gecikme
+
+            return true; // Formun hemen submit edilmesini engelle
+        }
+
+    function setFormAction(event) {
+            event.preventDefault();
+
+            var form = document.getElementById('debtForm');
+            var customerId = document.getElementById('customerSelect').value;
+            var orderId = document.getElementById('orderId').value;
+            var tableId = document.getElementById('tableId').value;
+
+            // Action URL'ini dinamik olarak ayarla
+            form.action = `/OrderTransactions/DebitToCustomer?orderId=${orderId}&tableId=${tableId}&customerId=${customerId}`;
+
+            // Formu gönder
+            form.submit();
+        }
+</script>

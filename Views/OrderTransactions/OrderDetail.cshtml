@@ -1,0 +1,57 @@
+@model Order
+
+@{
+    var className = @Model.isActive ? "primary":"danger";
+    var isActive = @Model.isActive  ? "Açık Sipariş" : "Kapalı Sipariş";
+}
+<div class="row">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+        <main class="text-center">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h1 class="h4">Sipariş Detayı</h1>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <span class="badge badge-@className">@isActive</span>
+                    </p>
+                    <p>Sipariş Ücreti : @Model.Price.ToString("F2")₺</p>
+                    <p>Sipariş Kârı : @Model.Spread.ToString("F2")₺</p>
+                    <p>Sipariş Tarihi : @Model.orderDate</p>
+                </div>
+            </div>
+        
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5">Sipariş Ürünleri</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @foreach(var item in Model.OrderItems)
+                        {
+                            <li class="list-group-item">@item</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div class="col-lg-4"></div>
+</div>
+
+<!-- <main class="text-center">
+    <h1 class="h4">Sipariş Detayı</h1>
+    <p>
+        <span class="badge badge-@className">@isActive</span>
+    </p>
+
+    <p>Telefon : @Model.Price</p>
+    <p>E Posta : @Model.orderDate</p>
+    <ul>
+        @foreach(var item in Model.OrderItems)
+        {
+            <li>@item</li>
+        } 
+    </ul>
+</main> -->

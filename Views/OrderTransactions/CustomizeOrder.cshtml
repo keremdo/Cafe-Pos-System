@@ -1,0 +1,288 @@
+@model OrderViewModel
+<style>
+    .product-item:hover {
+        opacity: 0.7; /* Butonun opaklığını düşürmek */
+        color: green;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .product-item:hover img,h4,h5{
+        transform: scale(1.1); /* Resmi biraz büyütmek */
+    }
+
+</style>
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row mb-3 align-items-center" style="height: 10%;">
+        <div class="col-6">
+            <div style="font-size: xx-large;">
+                @if(@Model.Table.TableName == null)
+                {
+                    <p>Hata  var</p>
+                }else{
+                    @Model.Table.TableName.ToUpper();
+                }
+               
+            </div>
+        </div>
+        <div class="col-6 text-right">
+            @if(Model.Order == null)
+            {
+                <a asp-controller="HomePage" asp-action="Orders" class="btn btn-warning">GERİ</a>
+            }else{
+                <a asp-controller="OrderTransactions" asp-action="OrderClosing" asp-route-tableId="@Model.Table.TableId" asp-route-orderId="@Model.Order.OrderId" class="btn btn-success mr-2">ÖDEME AL</a>
+                <a asp-controller="OrderTransactions" asp-action="ChangeOrder" asp-route-tableId="@Model.Table.TableId" asp-route-orderId="@Model.Order.OrderId" class="btn btn-success mr-2">MASA TAŞI</a>
+                <a asp-controller="HomePage" asp-action="Orders" class="btn btn-warning">GERİ</a>
+            }
+        </div>
+    </div>
+
+
+    <div class="row" style="height: 90%; background-color: #FFFFFF; overflow-x: auto; display: flex;">
+        <div class="column" style="width: 30%; border-right: 2px solid #17A673;">
+            <!-- İlk sütun içeriği buraya gelecek -->
+            <div style="text-align: center; height: 12%; border-bottom: 2px solid #17A673; border-top: 2px solid #17A673; display: flex; align-items: center; justify-content: center;">
+                <h2>Sipariş Ürünleri</h2>
+            </div>
+            <div class="m-3" style="height: 80%; border-bottom: 2px solid #17A673; overflow-y: auto;">
+                <!-- İkinci satır içeriği buraya gelecek -->
+                <div style="height: 100%;">
+                    <ul class="order-list list-group">
+                        <!-- İhtiyacınıza göre daha fazla öğe ekleyebilirsiniz -->
+                    </ul>
+                </div>
+
+            </div>
+            <div style="height: 8%; border-bottom: 2px solid #17A673; display: flex; align-items: center; justify-content: flex-end;">
+                @if(!Model.Table.isEmpty)
+                {
+                    <form id="order-form" asp-action="CreateOrder" asp-route-tableId="@Model.Table.TableId" method="post" style="display: inline-block;">
+                        <button type="submit" class="CreateOrder btn btn-success">Siparişi Kaydet</button>
+                    </form>
+                }else{
+                    if(Model.Order != null && Model.Table != null)
+                    {
+                        <form id="order-form" asp-action="UpdateOrder" asp-route-tableId="@Model.Table.TableId" asp-route-orderId="@Model.Order.OrderId"  style="display: inline-block;" method="post">
+                            <button type="submit" class="UpdateOrder btn btn-success">Siparişi Ekle</button>
+                        </form>
+                    }else{
+                        <p>hata var</p>
+                    }
+                   
+                }
+
+            </div>
+        </div>
+        <div class="column" style="flex: 1;display: flex; flex-direction: column;">
+            <!-- İkinci sütun içeriği buraya gelecek -->
+            <div style="flex: 1; width: 100%;">
+                <div class="row" style="padding-top: 5px; padding-bottom: 5px; border-bottom: 2px solid #17A673;">
+                    <div class="col">
+
+                    </div>
+                    <div class="col">
+                        <!-- Sağ sütun (select box sağa dayalı) -->
+                        <div style="display: flex; justify-content: flex-end;">
+                            <select id="categorySelect" class="form-select" style="width: 75%;">
+                                @foreach(var category in Model.Categories)
+                                {
+                                    <option value="@category.CategoryId">@category.CategoryName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="flex: 9; width: 98%;">
+                <div id="productContainer" class="row">
+                    @foreach(var product in Model.Products)
+                    {
+                        <a class="product-item" data-category-id="@product.Category.CategoryId" style="margin: 10px; display: inline-block;width: 200px; height: 200px;"
+                            onclick="addToOrderList('@product.ProductName', '@product.ProductPrice','@product.Spread')">
+                            @if(product.ImageUrl != null)
+                            {
+                                <img src="~/image/@product.ImageUrl" alt="Resim" style="width: 150px; height: 150px;">
+                            }
+                            else
+                            {
+                                <img src="~/image/emptyProduct.jpg" alt="Resim" style="width: 150px; height: 150px;">
+                            }
+                            <h4 style="text-align: center; color: #627254;">@product.ProductName</h4>
+                            <h5 style="text-align: center; color: #627254;">@product.ProductPrice ₺</h5>
+                        </a>
+                    }
+                </div>
+                <!-- İkinci satır içeriği buraya gelecek -->
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+    var categorySelect = document.getElementById("categorySelect");
+    var productItems = document.querySelectorAll(".product-item");
+
+    // Kategori değiştiğinde ürünleri filtreleyin
+    categorySelect.addEventListener("change", function() {
+        var selectedCategoryId = this.value;
+
+        // Ürünleri filtreleme
+        productItems.forEach(function(item) {
+            var itemCategoryId = item.getAttribute("data-category-id");
+
+            // Ürün kategori ile eşleşiyorsa göster, değilse gizle
+            if (itemCategoryId === selectedCategoryId || selectedCategoryId === "") {
+                item.style.display = "inline-block";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    });
+});
+
+function addToOrderList(productName, productPrice,productSpread) {
+    // console.log("Ürün adı: " + productName + ", Ürün fiyatı: " + productPrice);
+
+    // Liste içinde aynı ürün kontrolü
+    var orderList = document.querySelector(".order-list");
+    var existingItems = orderList.getElementsByTagName("li");
+
+    // Var olan ürünü kontrol et
+    for (var i = 0; i < existingItems.length; i++) {
+        if (existingItems[i].textContent.includes(productName)) {
+            // Ürün zaten listede var, eklenmeyecek
+            return;
+        }
+    }
+
+    // Yeni bir li öğesi oluştur
+    var newItem = document.createElement("li");
+    newItem.className = "list-group-item";
+
+    // Ürün bilgisi
+    var quantity = 1;
+    newItem.textContent ="Adet: " + quantity + " - " + productName + " - " + productPrice + " ₺";
+    newItem.setAttribute("data-spread",productSpread);
+
+    // Sil butonu oluştur
+    var deleteButton = document.createElement("button");
+    deleteButton.textContent = "Sil";
+    deleteButton.className = "btn btn-danger float-right delete-button";
+    deleteButton.style.marginLeft = "7px";
+
+    var addQuantityButton = document.createElement("button");
+    addQuantityButton.textContent = "Ekle";
+    addQuantityButton.className = "btn btn-success float-right create-button";
+
+
+    deleteButton.onclick = function() {
+        if(quantity > 1)
+        {
+            quantity--;
+            var price = quantity * productPrice
+            newItem.textContent = "Adet: " + quantity + " - " + productName + " - " + price + " ₺";
+            var xc = productSpread * quantity;
+            newItem.setAttribute("data-spread",xc);
+            newItem.appendChild(deleteButton);
+            newItem.appendChild(addQuantityButton);
+        }else{
+            newItem.remove();
+        }
+
+    };
+
+    addQuantityButton.onclick = function(){
+        quantity++;
+        var price = quantity * productPrice
+        newItem.textContent ="Adet: " + quantity + " - " + productName + " - " + price + " ₺";
+        var xc = productSpread * quantity;
+        newItem.setAttribute("data-spread",xc);
+        newItem.appendChild(deleteButton);
+        newItem.appendChild(addQuantityButton);
+    }
+    // Li öğesine sil butonunu ekle
+    newItem.appendChild(deleteButton);
+    newItem.appendChild(addQuantityButton);
+
+    // Yeni öğeyi listeye ekle
+    orderList.appendChild(newItem);
+}
+
+
+
+function handleOrderEvent(event) {
+    event.preventDefault(); // Sayfanın yenilenmesini önlemek için
+
+    // Listeyi al
+    var orderList = document.querySelectorAll('.order-list .list-group-item');
+
+    // Sipariş listesini dize formatına dönüştür
+    var orderItems = [];
+
+    orderList.forEach(function(item) {
+        var itemText = item.textContent.trim(); // Boşlukları kaldır
+        orderItems.push(itemText);
+    });
+
+    // Forma sipariş listesini gizli input alanı olarak ekleyin
+    var form = document.getElementById('order-form');
+    orderItems.forEach(function(item) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'orderItems[]'; // Formdaki model binder'ın doğru çalışması için [] ekleyin
+        input.value = item;
+        form.appendChild(input);
+    });
+
+    var total = 0; // Toplam fiyatı saklamak için bir değişken tanımla
+    var totalSpread = 0; // Toplam spread değerini saklamak için bir değişken tanımla
+
+    orderList.forEach(function(item) {
+        var itemText = item.textContent.trim(); // Boşlukları kaldır
+        var parts = itemText.split(' - '); // Metni parçalara ayır
+
+        // parts dizisindeki üçüncü elemanı (productPrice) toplam fiyata ekle
+        total += parseFloat(parts[2]);
+
+        // item'in data-spread değerini toplam spread değerine ekle
+        var spread = parseFloat(item.getAttribute("data-spread"));
+        if (!isNaN(spread)) {
+            totalSpread += spread;
+        }
+    });
+
+    // Toplam fiyatı double türünde bir değişkene atayın
+    var totalPrice = parseFloat(total.toFixed(2));
+
+    // Forma toplam fiyatı gizli input alanı olarak ekleyin
+    var totalPriceInput = document.createElement('input');
+    totalPriceInput.type = 'hidden';
+    totalPriceInput.name = 'totalPrice';
+    totalPriceInput.value = totalPrice;
+    form.appendChild(totalPriceInput);
+
+    // Toplam spread değerini double türünde bir değişkene atayın
+    var totalSpreadValue = parseFloat(totalSpread.toFixed(2));
+
+    // Forma toplam spread değerini gizli input alanı olarak ekleyin
+    var totalSpreadInput = document.createElement('input');
+    totalSpreadInput.type = 'hidden';
+    totalSpreadInput.name = 'totalSpread';
+    totalSpreadInput.value = totalSpreadValue;
+    form.appendChild(totalSpreadInput);
+
+    // Formu gönder
+    document.getElementById('order-form').submit();
+}
+
+
+    // .UpdateOrder ve .CreateOrder butonları için tıklama olayı ekle
+    document.querySelectorAll('.UpdateOrder, .CreateOrder').forEach(function(button) {
+        button.addEventListener('click', handleOrderEvent);
+    });
+
+</script>

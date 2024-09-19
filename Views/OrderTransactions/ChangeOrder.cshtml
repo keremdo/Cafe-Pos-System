@@ -1,0 +1,74 @@
+@model ChangeOrderViewModel
+
+<style>
+    .btnEmtyTable:hover {
+        opacity: 0.7; /* Butonun opaklığını düşürmek */
+        color: green;
+        text-decoration: none;
+    }
+    .btnEmtyTable:hover img {
+        transform: scale(1.1); /* Resmi biraz büyütmek */
+    }
+
+</style>
+
+ <!-- Page Heading -->
+ <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Siparişler</h1>
+    <div class="dropdown">
+        <div style="display: flex; justify-content: flex-end;">
+            <select id="tableSelect" class="form-select" style="width: 100%;">
+                <option value="all">Tüm Bölgeler</option>
+                @foreach(var area in Model.Areas)
+                {
+                    <option value="@area.AreaId">@area.AreaName</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    @foreach(var table in Model.Tables)
+    {
+    <div class="col-3 mb-4">
+        <!-- Boş Masa Butonu -->
+            <a asp-action="ChangeOrderDoing" asp-route-updatedTableId="@Model.Table.TableId" asp-route-TableId="@table.TableId" asp-route-orderId="@Model.Order.OrderId"  data-area-id="@table.Area.AreaId" class="col btnEmtyTable" style="display: inline-block;">
+                <h4 style="text-align: center; color: green;">@table.TableName - Boş</h4>
+                <div style="margin: 10px;">
+                    <img src="~/image/emptyTable.jpg" alt="Resim" style="width: 250px; height: 150px;">
+                </div>
+            </a> 
+    </div>
+    }
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var tableSelect = document.getElementById("tableSelect");
+
+        tableSelect.addEventListener("change", function() {
+            var selectedAreaId = this.value;
+
+            // Tüm masaları göstermek için seçilen değeri kontrol et
+            if (selectedAreaId === "all") {
+                var tables = document.querySelectorAll(".btnEmtyTable");
+                tables.forEach(function(table) {
+                    table.style.display = "block";
+                });
+            } else {
+                // Seçilen bölgeye ait masaları göster
+                var selectedTables = document.querySelectorAll(".btnEmtyTable[data-area-id='" + selectedAreaId + "']");
+                var allTables = document.querySelectorAll(".btnEmtyTable");
+                allTables.forEach(function(table) {
+                    table.style.display = "none";
+                });
+                selectedTables.forEach(function(table) {
+                    table.style.display = "block";
+                });
+            }
+        });
+    });
+</script>
+
+

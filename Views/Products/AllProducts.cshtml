@@ -1,0 +1,150 @@
+@model ProductViewModel
+<style>
+    .card{
+        color: black;
+
+    }
+    .card:hover {
+        text-decoration: none;
+        color: white;
+        transform: scale(1.05); /* Kartı büyütme */
+        transition: transform 0.3s ease; /* Geçiş efekti */
+        cursor: pointer;
+        background-color: #F3CA52;
+    }
+</style>
+
+<div class="container-fluid" style="height: 80vh;">
+    <div class="row mb-3 d-flex align-items-center" style="height: 10%;">
+        <div class="col">
+            <input type="text" id="productSearch" class="form-control" style="width: 30%;" placeholder="Ürün Ara..."> 
+            <div style="position: absolute; top: 0; right: 0;">
+                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#CreateProduct">Ürün Ekle</a>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="height: 90%; background-color: #FFFFFF; overflow-x: auto;">
+        <div class="col">
+            <div class="row" id="productList" style=" margin-top: 15px; margin-left: 15px;">
+                @if(Model.Products == null)
+                {
+                    <a class="card mb-3 mr-3 border border-success" style="width: 18rem; padding: 5px;" >
+                        <img src="https://www.shutterstock.com/shutterstock/photos/2282033179/display_1500/stock-photo-classic-hamburger-stock-photo-isolated-in-white-2282033179.jpg" class="card-img-top" alt="...">
+                        <div class="card-body">
+                          <p class="card-text">Ürün Yok</p>
+                          <p class="card-text">Ürün Yok</p>
+                          <p class="card-text">Ürün Yok</p>
+                        </div>
+                    </a>
+                }else
+                {
+                    @foreach(var product in Model.Products)
+                    {
+                        if(product.ImageUrl != null)
+                        {
+                            <a asp-action="ProductDetails" asp-route-productId="@product.ProductId" class="card mb-3 mr-3 border border-success" style="width: 18rem; padding: 5px;" data-name="@product.ProductName @product.Description @product.Category.CategoryName" >
+                                <img src="~/image/@product.ImageUrl" class="card-img-top" alt="...">
+                                <div class="card-body">
+                                <p class="card-text">@product.ProductName</p>
+                                <p class="card-text">@product.Description</p>
+                                <p class="card-text">@product.ProductPrice ₺</p>
+                                <p class="card-text">@product.Category.CategoryName</p>
+                                </div>
+                            </a>
+                        }else{
+                            <a asp-action="ProductDetails" asp-route-productId="@product.ProductId" class="card mb-3 mr-3 border border-success" style="width: 18rem; padding: 5px;" data-name="@product.ProductName @product.Description @product.Category.CategoryName" >
+                                <img src="~/image/emptyProduct.jpg" class="card-img-top" alt="..." class="img-fluid">
+                                <div class="card-body">
+                                    <p class="card-text">@product.ProductName</p>
+                                    <p class="card-text">@product.Description</p>
+                                    <p class="card-text">@product.ProductPrice ₺</p>
+                                    <p class="card-text">@product.Category.CategoryName</p>
+                                </div>
+                            </a>
+                        }
+                        
+                    }
+                }   
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="CreateProduct" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Yeni Ürün Ekle</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+    <form asp-controller="Products" asp-action="AddNewProduct" method="post" enctype="multipart/form-data">
+        <div class="modal-body">
+            <div class="row" style="width: 100%;">
+                <div class="col" style="width: 50%;">
+                    <div class="mb-3">
+                        <label asp-for="ProductName" class="form-label">Ürün İsmi:</label>
+                        <input asp-for="ProductName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ProductPurchasePrice" class="form-label">Ürün Alış Fiyatı:</label>
+                        <input asp-for="ProductPurchasePrice" class="form-control" type="number">
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ProductPrice" class="form-label">Ürün Fiyatı:</label>
+                        <input asp-for="ProductPrice" class="form-control" type="number">
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="col-form-label">Ürün Açıklaması:</label>
+                        <textarea asp-for="Description" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CategoryName">Kategori Seçin</label>
+                        <select asp-for="CategoryId" asp-items="@ViewBag.Categories" class="form-control" name="CategoryId" required>
+                            <option value="">Lütfen bir kategori seçin</option>
+                            <!-- <option value="@Model.CategoryId">@Model.CategoryName</option> -->
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </select>
+                    </div>
+                </div>
+                <div class="col" style="width: 50%;">
+                    <div class="mb-3">
+                        <label for="productImage" class="form-label">Ürün Resmi:</label>
+                        <input type="file" class="form-control" id="imageFile" name="imageFile">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Ürün Ekle</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+        </div> 
+    </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var searchInput = document.getElementById("productSearch");
+        var productList = document.getElementById("productList");
+        var products = productList.getElementsByClassName("card");
+    
+        searchInput.addEventListener("keyup", function() {
+            var searchTerm = searchInput.value.toLowerCase();
+    
+            Array.from(products).forEach(function(product) {
+                var productName = product.getAttribute("data-name").toLowerCase();
+    
+                if (productName.includes(searchTerm)) {
+                    product.style.display = "block";
+                } else {
+                    product.style.display = "none";
+                }
+            });
+        });
+    });
+    </script>
+    

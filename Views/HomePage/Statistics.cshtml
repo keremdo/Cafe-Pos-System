@@ -1,0 +1,403 @@
+@model StatisticViewModel
+
+
+    @{
+        DateTime today = DateTime.Today;
+        DateTime lastWeek = today.AddDays(-7);
+        DateTime lastMonth = today.AddDays(-30);
+        int openOrder = 0;
+
+        double dailyPrice = Model.Payments
+            .Where(s => s.PaymentDate == today)
+            .Sum(s => s.PaymentPrice);
+
+        double dailyPriceReport = Model.Orders
+        .Where(s => s.orderDate == today)
+        .Sum(s => s.Spread);
+
+        double dailyExpens = dailyPrice - dailyPriceReport;
+
+        double weeklyPrice = Model.Payments
+            .Where(s => s.PaymentDate >= lastWeek && s.PaymentDate <= today)
+            .Sum(s => s.PaymentPrice);
+
+        double weeklyPriceReport = Model.Orders
+            .Where(s => s.orderDate >= lastWeek && s.orderDate <= today)
+            .Sum(s => s.Spread);    
+
+        double weeklyExpens = weeklyPrice - weeklyPriceReport;
+        
+        double mountlyPrice = Model.Payments
+            .Where(s => s.PaymentDate >= lastMonth && s.PaymentDate <= today)
+            .Sum(s => s.PaymentPrice);
+
+        double mounthlyPriceReport = Model.Orders
+            .Where(s => s.orderDate >= lastMonth && s.orderDate <= today)
+            .Sum(s => s.Spread);
+
+        double mounthlyExpens = mountlyPrice - mounthlyPriceReport;
+
+        foreach(var order in Model.Orders)
+        {
+            if(order.isActive == true)
+            {
+                openOrder++;
+            }
+        }
+    }
+
+    <style>
+        .chart-area {
+            height: 100%;
+        }
+
+        .dailyPriceReport,.weeklyPriceReport,.mountlyPriceReport,.openOrderReport {
+            transition: transform 0.3s ease; /* Hover efektinin geçiş süresi */
+            text-decoration: none;
+        }
+
+        .dailyPriceReport:hover,.weeklyPriceReport:hover,.mountlyPriceReport:hover,.openOrderReport:hover {
+            transform: scale(1.1); /* Hover durumunda öğeyi %10 büyüt */
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+    
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">İstatistikler</h1>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                                class="fas fa-download fa-sm text-white-50"></i> Rapor Et</a>
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <a class="col-xl-3 col-md-6 mb-4 dailyPriceReport" data-toggle="modal" data-target="#DailyReportModal">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Kazanç (Günlük)</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@dailyPrice.ToString("N2")₺</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <a class="col-xl-3 col-md-6 mb-4 weeklyPriceReport" data-toggle="modal" data-target="#WeeklyReportModal">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Kazanç (Haftalık)</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@weeklyPrice.ToString("N2")₺</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <a class="col-xl-3 col-md-6 mb-4 mountlyPriceReport" data-toggle="modal" data-target="#MonthlyReportModal">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Aylık Kazanç
+                                            </div>
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col-auto">
+                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">@mountlyPrice.ToString("N2")₺</div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="progress progress-sm mr-2">
+                                                        <div class="progress-bar bg-info" role="progressbar"
+                                                            style="width: 30%" aria-valuenow="50" aria-valuemin="0"
+                                                            aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Pending Requests Card Example -->
+                        <a class="col-xl-3 col-md-6 mb-4 openOrderReport">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Açık Siparişler</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">@openOrder.ToString()</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Content Row -->
+
+                    <div class="row">
+
+                        <!-- Area Chart -->
+                        <div class="col-xl-8 col-lg-7" style="height: 500px; overflow-y: auto">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Ödemeler Tablosu</h6>
+                                    <div class="d-flex">
+                                        <input type="date" id="startDate" class="form-control mr-2" placeholder="Başlangıç Tarihi">
+                                        <input type="date" id="endDate" class="form-control" placeholder="Bitiş Tarihi">
+                                        <button type="button" class="btn btn-primary ml-2" onclick="filterPayments()">Filtrele</button>
+                                    </div>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body paymentsTable">
+                                    <div class="chart-area">
+                                        <table class="table" id="paymentsTable">
+                                            <thead>
+                                              <tr>
+                                                <th scope="col">Ödeme Numarası</th>
+                                                <th scope="col">Ödeme Tutarı</th>
+                                                <th scope="col">Ödeme Yöntemi</th>
+                                                <th scope="col">Ödeme Tarihi</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              @foreach(var item in Model.Payments)
+                                              {
+                                                <tr class="tablesRows">
+                                                    <th scope="row">@item.PaymentId</th>
+                                                    <td>@item.PaymentPrice.ToString("F2")₺</td>
+                                                    <td>@item.PaymentMethod</td>
+                                                    <td>@item.PaymentDate</td>
+                                                </tr>
+                                              }
+                                            </tbody>
+                                          </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                       
+                    </div>            
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    
+    <!-- Günlük Kazanç Modal -->
+    <div class="modal fade" id="DailyReportModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Günlük Kazanç Raporu</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-12 mb-2">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Kazanç (Günlük)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@dailyPrice.ToString("N2")₺</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Ürün Bazlı Kâr (Günlük)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@dailyPriceReport.ToString("N2")₺</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- haftalık rapor modal -->
+    <div class="modal fade" id="WeeklyReportModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Haftalık Kazanç Raporu</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-12 mb-2">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Kazanç (Haftalık)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@weeklyPrice.ToString("N2")₺</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Ürün Bazlı Kâr (Haftalık)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@weeklyPriceReport.ToString("N2")₺</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="MonthlyReportModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Aylık Kazanç Raporu</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-12 mb-2">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Kazanç (Aylık)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@mountlyPrice.ToString("N2")₺</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Ürün Bazlı Kâr (Aylık)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@mounthlyPriceReport.ToString("N2")₺</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End of Page Wrapper -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    function filterPayments() {
+        var startDate = new Date(document.getElementById('startDate').value);
+        var endDate = new Date(document.getElementById('endDate').value);
+        console.log('Başlangıç Tarihi:', startDate);
+        console.log('Bitiş Tarihi:', endDate);
+
+        var table = document.getElementById('paymentsTable');
+        var rows = table.getElementsByClassName('tablesRows');
+
+        for (var i = 1; i < rows.length; i++) {
+            var paymentDate = new Date(rows[i].getElementsByTagName('td')[3].innerText);
+
+            if (paymentDate >= startDate && paymentDate <= endDate) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+</script>

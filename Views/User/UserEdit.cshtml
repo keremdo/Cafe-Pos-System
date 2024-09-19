@@ -1,0 +1,67 @@
+@{
+    Layout = "_Layout";
+}
+@model EditViewModel
+<div class="row">
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8">
+        <div class="mb-3 card">
+            <div class="card-header">
+                Müşteri Bilgileri
+            </div>
+            <div class="card-body">
+                <h4>@Model.FullName</h4>
+                <h4>@Model.AppUser.Adress</h4>
+                <h4>@Model.AppUser.PhoneNumber</h4>
+                <h4>@Model.Email</h4>
+            </div>
+        </div>
+        <form asp-controller="User" asp-action="UserEdit"  method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <input type="hidden" name="Id" value="@Model.Id">
+            <!-- <div class="mb-3">
+                <label asp-for="FullName">İsim Soyisim</label>
+                <input asp-for="FullName" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email">E Posta</label>
+                <input asp-for="Email" class="form-control">
+            </div> -->
+            <div class="mb-3">
+                <label asp-for="Password">Şifre</label>
+                <input asp-for="Password" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword">Şifre Tekrar</label>
+                <input asp-for="ConfirmPassword" class="form-control">
+            </div>
+            <div class="mb-3 card">
+                <div class="card-header">
+                    Yetkiler
+                </div>
+                <div class="card-body">
+                    @foreach(var role in ViewBag.Roles)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox"
+                            class="form-check-input"
+                            name="SelectedRoles"
+                            value="@role"
+                            id="@role"
+                            @if(Model.SelectedRoles != null)
+                            {
+                                @(Model.SelectedRoles.Any(i=>i == role)? "checked":"")
+                            }
+                            >
+                            <label for="@role" class="form-check-label">@role</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        
+            <button type="submit" class="btn btn-primary">Güncelle</button>
+        </form>
+    </div>
+    <div class="col-lg-2"></div>
+    
+</div>

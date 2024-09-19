@@ -1,0 +1,70 @@
+@model List<Order>
+    <div class="container-fluid" style="height: 80vh;">
+        <div class="row mb-3 d-flex align-items-center" style="height: 5%;">
+            <form method="get" asp-action="Index" id="dateForm">
+                <div class="form-group">
+                    <label for="orderDate">Tarih Seç:</label>
+                    <input type="date" id="orderDate" name="orderDate" style="width: 200px; height: 30px;" class="form-control" onchange="fetchOrders()" />
+                </div>
+            </form>
+        </div>
+        <div class="row mb-3 d-flex align-items-center" style="height: 95%;">
+            <table class="table table-striped" id="ordersTable">
+                <thead>
+                  <tr>
+                    <th scope="col">Sipariş Numarası</th>
+                    <th scope="col">Sipariş Masası</th>
+                    <th scope="col">Sipariş Ücreti</th>
+                    <th scope="col">Sipariş Tarihi</th>
+                    <th scope="col">Sipariş Detayi</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                  @foreach(var o in Model)
+                  {
+                    <tr>
+                        <th scope="row">@o.OrderId</th>
+                        <td>@o.Table.TableName</td>
+                        <td>@o.Price.ToString("F2")₺</td>
+                        <td>@o.orderDate</td>
+                        <td>
+                            <a asp-action="OrderDetail" asp-route-orderId="@o.OrderId" class="btn btn-success">Detay</a>
+                        </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+        </div>
+        
+    </div>
+
+    <script>
+        function fetchOrders() {
+            const selectedDate = document.getElementById('orderDate').value;
+            
+            fetch(`/Orders/GetOrdersByDate?orderDate=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const ordersTableBody = document.getElementById('ordersTableBody');
+                    ordersTableBody.innerHTML = ''; // Önceki içeriği temizle
+    
+                    data.forEach(order => {
+                        const row = `
+                            <tr>
+                                <th scope="row">${order.OrderId}</th>
+                                <td>${order.Table.TableName}</td>
+                                <td>${order.Price.toFixed(2)}₺</td>
+                                <td>${order.OrderDate}</td>
+                                <td>
+                                    <a href="/Orders/OrderDetail?orderId=${order.OrderId}" class="btn btn-success">Detay</a>
+                                </td>
+                            </tr>`;
+                        ordersTableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error('Error fetching orders:', error));
+        }
+    </script>
+
+    
+    
